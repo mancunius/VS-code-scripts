@@ -1,0 +1,44 @@
+import csv
+import re
+
+def process_csv(input_file, output_file):
+    # Define the fields to extract
+    fields_to_extract = [
+        'annotation', 'author', 'book', 'centering-scheme', 'commentary',
+        'font', 'fontsize', 'height', 'initial-style', 'libitum', 
+        'nabc-lines', 'name', 'occasion', 'office-part', 'text-right',
+        'transcriber', 'user-notes', 'mode'
+    ]
+    
+    # Define fieldnames for output CSV
+    fieldnames = ['Filename'] + [field.capitalize() for field in fields_to_extract] + ['Content', 'Removed']
+    
+    rows = []
+    
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        
+        for row in reader:
+            content = row['Content']
+            filename = row['Filename']
+            removed_text = content  # Start with full content for `Removed`
+            
+            # Initialize dictionary for extracted data
+            extracted_data = {field.capitalize(): '' for field in fields_to_extract}
+            
+            # Extract each field based on a regex
+            for field in fields_to_extract:
+                # Adjust the regex to handle fields followed by ;, %% or end of line
+                if field == 'mode':
+                    # For mode, capture 1-2 letters or a digit followed by either `;`, `%%` or end of line
+                    regex = fr"{field}:\s*([a-zA-Z0-9]+)(?=\s*(;|%%|\n|$))"
+                else:
+                    # Default regex for other fields
+                    regex = fr"{field}:\s*([^;%%\n]+?)(?=\s*(;|%%|\n|$))"
+                
+                # Search for the field in the content
+                match = re.search(regex, content)
+                if match:
+                    extracted_value = match.group(1).strip()  # Strip leading/trailing spaces
+                    extracted_data[field.capitalize()] = extracted_value
+                    # Remove the matched field

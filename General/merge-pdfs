@@ -1,0 +1,56 @@
+from pathlib import Path
+from PyPDF2 import PdfMerger
+
+def ask_directory(prompt):
+    while True:
+        path = Path(input(prompt).strip()).expanduser()
+        if path.is_dir():
+            return path
+        print("❌ That is not a valid directory. Please try again.\n")
+
+def ask_output_file(prompt):
+    while True:
+        path = Path(input(prompt).strip()).expanduser()
+        if path.suffix.lower() != ".pdf":
+            path = path.with_suffix(".pdf")
+        if path.parent.exists():
+            return path
+        print("❌ Output directory does not exist. Please try again.\n")
+
+def main():
+    print("PDF Merger\n")
+
+    # Ask for input directory
+    input_dir = ask_directory(
+        "Enter the directory containing the PDFs to merge:\n> "
+    )
+
+    pdf_files = sorted(input_dir.glob("*.pdf"))
+
+    if not pdf_files:
+        print("\n❌ No PDF files found in that directory.")
+        return
+
+    print(f"\nFound {len(pdf_files)} PDFs:")
+    for pdf in pdf_files:
+        print("  -", pdf.name)
+
+    # Ask for output file
+    output_file = ask_output_file(
+        "\nEnter the full path for the merged PDF (filename included):\n> "
+    )
+
+    merger = PdfMerger()
+
+    for pdf in pdf_files:
+        merger.append(pdf)
+
+    merger.write(output_file)
+    merger.close()
+
+    print(f"\n✅ Merged PDF created:\n{output_file}")
+
+if __name__ == "__main__":
+    main()
+
+    '''This script merges all PDF files in a specified directory into a single PDF file. It prompts the user for the input directory and the output file path, then combines the PDFs in alphabetical order.'''

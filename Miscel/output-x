@@ -1,0 +1,31 @@
+import csv
+
+def find_music_with_x(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        
+        # List to store Music column content with 'x'
+        x_music = []
+        
+        for row in reader:
+            music_text = row['modern pitch']
+            
+            # Check if 'x' is present in the Music column and add to x_music
+            if 'x' in music_text:
+                x_music.append([music_text])
+    
+    # Write the filtered music to a new CSV file
+    if x_music:
+        with open(output_file, mode='w', encoding='utf-8', newline='') as x_outfile:
+            writer = csv.writer(x_outfile)
+            writer.writerows(x_music)
+
+    print(f"Music with 'x' saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/modern_pitch.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/music_with_x-1.csv'
+
+# Run the function
+find_music_with_x(input_csv, output_csv)

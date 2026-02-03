@@ -1,0 +1,52 @@
+import os
+
+def search_and_replace(directory, search_text, replacement_text):
+    # Text-based file extensions to include
+    valid_extensions = {'.tex', '.txt', '.html', '.csv', '.xml', '.md', '.gabc'}
+    files_updated = []
+
+    # Iterate through all files in the directory
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+
+            # Skip files without valid extensions
+            if not any(file.endswith(ext) for ext in valid_extensions):
+                continue
+
+            try:
+                # Open the file and search for the text
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                if search_text in content:
+                    print(f"Found '{search_text}' in file: {file_path}")
+
+                    # Replace the text
+                    updated_content = content.replace(search_text, replacement_text)
+
+                    # Write the updated content back to the file
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(updated_content)
+
+                    files_updated.append(file_path)
+                    print(f"Updated file: {file_path}")
+
+            except Exception as e:
+                print(f"Error reading file {file_path}: {e}")
+
+    # Summary of updates
+    if files_updated:
+        print("\nThe following files were updated:")
+        for file in files_updated:
+            print(file)
+    else:
+        print("\nNo files were updated.")
+
+# Specify the directory, search text, and replacement text
+directory = '/Users/martinbaker/Dropbox/03_Professional/34_LaTeX/LaTeX_gregorio/ICEL-gregorio-2024'
+search_text = '{greg.conf}'
+replacement_text = '{greg.txt}'
+
+# Run the script
+search_and_replace(directory, search_text, replacement_text)

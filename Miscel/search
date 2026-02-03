@@ -1,0 +1,59 @@
+import csv
+
+def search_and_output(input_file, output_file, search_column, search_value, target_columns, order_by_column=None, use_position=False):
+    # Normalize search_value for æ and ae
+    search_value = search_value.lower().replace("æ", "ae")
+    
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.reader(infile)
+        
+        # Read the header
+        header = next(reader)
+        
+        # Map column letters to positions if needed
+        if use_position:
+            column_map = {chr(65 + i): i for i in range(len(header))}  # A -> 0, B -> 1, etc.
+            search_column_index = column_map[search_column.upper()]
+            target_column_indices = [column_map[col.upper()] for col in target_columns]
+            order_by_index = column_map[order_by_column.upper()] if order_by_column else None
+        else:
+            search_column_index = header.index(search_column)
+            target_column_indices = [header.index(col) for col in target_columns]
+            order_by_index = header.index(order_by_column) if order_by_column else None
+        
+        # Collect rows that match the search condition
+        rows_to_write = []
+        for row in reader:
+            # Normalize data in the search column for æ and ae
+            search_column_value = row[search_column_index].strip().lower().replace("æ", "ae")
+            
+            # Check if the normalized search_value is contained in the normalized search_column_value
+            if search_value in search_column_value:
+                # Collect values from the target columns
+                row_data = {col: row[target_column_indices[i]].strip() for i, col in enumerate(target_columns)}
+                rows_to_write.append(row_data)
+        
+        # Sort rows if an order_by_column is specified
+        if order_by_column:
+            rows_to_write.sort(key=lambda x: x[order_by_column])
+    
+    # Write the output CSV file
+    fieldnames = target_columns
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows_to_write)
+
+    print(f"Data has been written to {output_file}")
+
+# Usage
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/gabc_absolute.csv'  # Input file path
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/mode_contains_ae_output_sorted.csv'  # Output file path
+search_column = 'Name'  # Search column title
+search_value = 'ecce sacerdos'  # Substring to search for (case-insensitive, matches both æ and ae)
+target_columns = ['Name', 'Mode', 'gabc absolute', 'Music', 'Folder']  # Columns to include in output
+order_by_column = 'Name'  # Column to sort the output by
+use_position = False  # Set to False because we are using column titles
+
+search_and_output(input_csv, output_csv, search_column, search_value, target_columns, order_by_column, use_position)

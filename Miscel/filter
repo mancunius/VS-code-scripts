@@ -1,0 +1,37 @@
+import csv
+
+def filter_and_output(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames + ['modern pitch']  # Include the 'modern pitch' column
+        rows = []
+
+        # Process each row
+        for row in reader:
+            # Filter rows where 'clef' contains 'f3'
+            if 'Universi' in row.get('Name', ''):
+                # Select only the columns we want: Name, mode, Music, gabc absolute, and modern pitch
+                filtered_row = {
+                    'Name': row.get('Name', ''),
+                    'mode': row.get('Mode', ''),
+                    'Music': row.get('Music', ''),
+                    'gabc absolute': row.get('gabc absolute', ''),
+                    'modern pitch': row.get('modern pitch', '')
+                }
+                rows.append(filtered_row)
+
+    # Write the filtered rows to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=['Name', 'mode', 'Music', 'gabc absolute', 'modern pitch'])
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Filtered data saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/modern_pitch.csv'  # Replace with the path to your previously created file
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/filter.csv'  # Replace with the desired output file path
+
+# Run the function to filter and save the result
+filter_and_output(input_csv, output_csv)

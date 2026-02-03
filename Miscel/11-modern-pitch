@@ -1,0 +1,127 @@
+import csv
+import re
+
+def transform_music(input_file, output_file):
+    # Helper function to shift letters
+    def shift_letter(letter, steps, direction):
+        alphabet = 'abcdefghi'
+        extended_alphabet = 'abcdefghijklmno'  # Extend alphabet beyond 'i' as needed
+        if letter not in alphabet:
+            return letter  # Ignore non-note characters
+        index = alphabet.index(letter)
+        if direction == 'advance':
+            new_index = index + steps
+        elif direction == 'reduce':
+            new_index = index - steps
+        # Ensure new_index stays within the bounds, extending beyond 'i'
+        if new_index >= len(extended_alphabet):
+            new_index = len(extended_alphabet) - 1
+        elif new_index < 0:
+            new_index = 0
+        return extended_alphabet[new_index]
+
+    # Helper function to convert to the new pitch system
+    def convert_to_new_pitch_system(letter):
+        pitch_map = {
+            'a': 'a', 'b': 'b', 'c': 'c', 'd': 'd', 'e': 'e', 'f': 'f', 'g': 'g',
+            'h': "a'", 'i': "b'", 'j': "c'", 'k': "d'", 'l': "e'", 'm': "f'", 'n': "g'",
+            'o': "a''", 'p': "b''", 'q': "c''", 'r': "d''", 's': "e''", 't': "f''",
+            'u': "g''", 'v': "a'''", 'w': "b'''", 'x': 'x'  # x is unchanged
+        }
+        return pitch_map.get(letter, letter)  # Default to the letter itself if not in the map
+
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames + ['modern pitch']  # Add new column for converted pitch system
+        rows = []
+
+        for row in reader:
+            music_text = row['gabc absolute']  # Use the "gabc absolute" from previous output
+
+            # Regex to find symbols and notes
+            pattern = re.compile(r'(c4|c3|f3|c2|cb4|cb3|cb2|f4|f2|x|[a-i]+)')
+            music_transformed = []
+            last_pos = 0
+            transform_active = None
+            transform_steps = 0
+
+            # Process matches
+            for match in pattern.finditer(music_text):
+                segment = match.group(0)
+                # Add text before the match (if any)
+                music_transformed.append(music_text[last_pos:match.start()])
+
+                if segment in {'c4', 'cb4', 'f2'}:
+                    # Reset transformations for symbols that don't modify letters
+                    transform_active = None
+                    transform_steps = 0
+                    music_transformed.append(segment)
+                elif segment == 'c3':
+                    transform_active = 'advance'
+                    transform_steps = 2
+                    music_transformed.append(segment)
+                elif segment == 'f3':
+                    transform_active = 'reduce'
+                    transform_steps = 2
+                    music_transformed.append(segment)
+                elif segment == 'c2':
+                    transform_active = 'advance'
+                    transform_steps = 4
+                    music_transformed.append(segment)
+                elif segment == 'cb3':
+                    transform_active = 'advance'
+                    transform_steps = 2
+                    music_transformed.append(segment)
+                elif segment == 'cb2':
+                    transform_active = 'advance'
+                    transform_steps = 4
+                    music_transformed.append(segment)
+                elif segment == 'f4':
+                    transform_active = 'reduce'
+                    transform_steps = 4
+                    music_transformed.append(segment)
+                elif segment == 'x':
+                    # Leave `x` unchanged
+                    transform_active = None
+                    transform_steps = 0
+                    music_transformed.append(segment)
+                elif all(char in 'abcdefghi' for char in segment):
+                    # Apply transformation to notes
+                    if transform_active:
+                        transformed = ''.join(
+                            shift_letter(char, transform_steps, transform_active) for char in segment
+                        )
+                        music_transformed.append(transformed)
+                    else:
+                        music_transformed.append(segment)
+                else:
+                    # Append unmatched segments as-is
+                    music_transformed.append(segment)
+
+                last_pos = match.end()
+
+            # Add remaining text after the last match
+            music_transformed.append(music_text[last_pos:])
+
+            # Now apply the modern pitch conversion to the entire transformed text
+            modern_pitch = ''.join(convert_to_new_pitch_system(char) for char in ''.join(music_transformed))
+
+            # Add the transformed music to the new column
+            row['modern pitch'] = modern_pitch
+            rows.append(row)
+
+    # Write to output CSV
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Processed and saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/gabc_absolute.csv'  # Replace with your input file path
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/modern_pitch.csv'  # Replace with your desired output file path
+
+# Run the function
+transform_music(input_csv, output_csv)

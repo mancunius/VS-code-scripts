@@ -1,0 +1,59 @@
+import random
+import os
+
+# List of lines to be randomized
+lines = [
+    "Gt Double Open Diapason 16",
+    "Gt Large Open Diapason 8",
+    "Gt Small Open Diapasonm8",
+    "Gt Claribel Flute 8",
+    "Gt Viola 8",
+    "Gt Octave 4",
+    "Gt Octave Quint 2 2/3",
+    "Gt Super Octave 2",
+    "Gt Mixture III",
+    "Gt Tromba 8",
+    "Gt Octave Tromba 4",
+    "Sw Contra Gamba 16",
+    "Sw Open Diapason 8",
+    "Sw Lieblich Gedact 8",
+    "Sw Echo Gamba 8",
+    "Sw Voix Celestes 8",
+    "Sw Principal 4",
+    "Sw Lieblich Flöte 4",
+    "Sw Flageolet 2",
+    "Sw Mixture III",
+    "Sw Double Trumpet 16",
+    "Sw Trumpet 8",
+    "Sw Oboe 8",
+    "Sw Vox Humana 8",
+    "Sw Clarion 4",
+    "Ch Rohr Flöte 8",
+    "Ch Viole d'Amour 8",
+    "Ch Dulciana 8",
+    "Ch Flauto Traverso 4",
+    "Ch Gemshorn 4",
+    "Ch Harmonic Piccolo 2",
+    "Ch Clarinet 8",
+    "Pd Open Wood 16",
+    "Pd Violone 16",
+    "Pd Sub Bass 16",
+    "Pd Violoncello 8",
+    "Pd Ophicleide 16"
+]
+
+# Randomize the order of the lines
+random.shuffle(lines)
+
+# Get the path to the desktop
+desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+
+# Define the output file path
+output_file = os.path.join(desktop_path, "randomized_lines.txt")
+
+# Write the randomized lines to the output file
+with open(output_file, "w") as file:
+    for line in lines:
+        file.write(line + "\n")
+
+print(f"Randomized lines have been written to '{output_file}'.")

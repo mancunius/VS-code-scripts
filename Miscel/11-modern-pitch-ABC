@@ -1,0 +1,46 @@
+import csv
+
+def convert_to_modern_pitch(gabc_text):
+    # Conversion mapping for letters 'h' to 'n' (to 'A' to 'G')
+    conversion_map = {
+        'h': 'A', 'i': 'B', 'j': 'C', 'k': 'D', 'l': 'E', 'm': 'F', 'n': 'G'
+    }
+
+    # Convert the gabc absolute column text to the modern pitch system
+    modern_pitch_text = ''.join(conversion_map.get(char, char) for char in gabc_text)
+
+    return modern_pitch_text
+
+def convert_and_add_column(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames + ['modern pitch']  # Add the 'modern pitch' column
+        rows = []
+
+        # Process each row
+        for row in reader:
+            # Get the 'gabc absolute' column and convert it to the new pitch system
+            gabc_absolute = row.get('gabc absolute', '')
+            modern_pitch = convert_to_modern_pitch(gabc_absolute)
+
+            # Add the 'modern pitch' to the row
+            row['modern pitch'] = modern_pitch
+
+            # Append the row to the list
+            rows.append(row)
+
+    # Write the updated rows with the new 'modern pitch' column to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Updated data with modern pitch saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/gabc_absolute.csv'  # Replace with your input file path
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/modern_pitch.csv'  # Replace with your desired output file path
+
+# Run the function to convert and add the modern pitch column
+convert_and_add_column(input_csv, output_csv)

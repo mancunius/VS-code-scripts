@@ -1,0 +1,31 @@
+import csv
+import re
+
+def filter_content(input_file, output_file):
+    rows_to_output = []
+
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        
+        for row in reader:
+            content = row['Content']
+            
+            # Check if Content does not begin with (C or (F
+            if not re.match(r'^\((C|F)', content):
+                rows_to_output.append({'Content': content})
+    
+    # Write only the Content column to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=['Content'])
+        writer.writeheader()
+        writer.writerows(rows_to_output)
+
+    print(f"Filtered {len(rows_to_output)} rows. Output saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed_with_waste.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_filtered_content.csv'
+
+# Run the function
+filter_content(input_csv, output_csv)

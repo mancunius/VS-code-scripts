@@ -1,0 +1,35 @@
+import csv
+import re
+
+def extract_clefs(input_file, output_file):
+    # Define the regex pattern for the clefs
+    clefs_pattern = r'\((?:c[1-4]|f[1-4]|cb[1-4]|fb[1-4])\)'
+    
+    rows = []
+    
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames + ['Clefs']  # Add new column Clefs
+        
+        for row in reader:
+            content = row['Content']
+            # Extract all clefs matching the pattern
+            clefs = re.findall(clefs_pattern, content)
+            # Join all found clefs into a single string separated by commas
+            row['Clefs'] = ', '.join(clefs) if clefs else ''
+            rows.append(row)
+    
+    # Write the updated rows to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    
+    print(f"Processed {len(rows)} rows. Output saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed_updated2.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_with_clefs.csv'
+
+# Run the function
+extract_clefs(input_csv, output_csv)

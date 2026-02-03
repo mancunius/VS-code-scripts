@@ -1,0 +1,42 @@
+import csv
+
+def process_office_part(input_file, output_file):
+    # Step 1: Load the data and find all unique values in the 'Office-part' column
+    unique_office_parts = set()
+    rows = []
+    
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames + ['Office-part-updated']
+        
+        for row in reader:
+            rows.append(row)
+            office_part = row.get('Office-part', '').strip()
+            if office_part:
+                unique_office_parts.add(office_part)
+    
+    # Step 2: Ask the user what each unique value should be replaced with
+    replacement_map = {}
+    print("Unique values found in 'Office-part':")
+    for office_part in sorted(unique_office_parts):
+        new_value = input(f"Replace '{office_part}' with (leave blank to keep as is): ").strip()
+        replacement_map[office_part] = new_value if new_value else office_part
+    
+    # Step 3: Update rows with the new column 'Office-part-updated'
+    for row in rows:
+        office_part = row.get('Office-part', '').strip()
+        row['Office-part-updated'] = replacement_map.get(office_part, office_part)
+    
+    # Step 4: Write the updated data to a new CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    
+    print(f"Processed {len(rows)} rows. Output saved to {output_file}.")
+
+# Usage
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed_updated.csv'
+
+process_office_part(input_csv, output_csv)

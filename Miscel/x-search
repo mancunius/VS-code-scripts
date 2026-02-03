@@ -1,0 +1,40 @@
+import csv
+import re
+from collections import Counter
+
+def extract_and_count_x_preceding_letter(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+
+        # List to store all the (letter, x) pairs
+        x_preceding_letter = []
+
+        # Iterate over each row in the CSV
+        for row in reader:
+            music_text = row['Music']
+            
+            # Find all occurrences of a letter preceding an 'x'
+            matches = re.findall(r'(\w)x', music_text)
+
+            # Add the matched pair (letter, x) to the list
+            x_preceding_letter.extend(matches)
+
+        # Count the occurrences of each (letter, x) pair
+        count_pairs = Counter(x_preceding_letter)
+
+        # Write the results to the output file
+        with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+            writer = csv.writer(outfile)
+            writer.writerow(['Letter', 'X', 'Count'])  # Write the header
+            for letter, count in count_pairs.items():
+                writer.writerow([letter, 'x', count])  # Output the letter, 'x', and count
+
+    print(f"Unique letter-x pairs and their counts have been saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_yippee.csv'  # Adjust input file path as needed
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/letter_x_pairs_counts.csv'  # Output file path
+
+# Run the function
+extract_and_count_x_preceding_letter(input_csv, output_csv)

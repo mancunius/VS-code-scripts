@@ -1,0 +1,32 @@
+import os
+from datetime import datetime
+from PyPDF2 import PdfMerger
+
+# Ask user for directory
+pdf_dir = input("Please specify the directory containing the PDFs: ").strip()
+
+# Validate input directory
+if not os.path.isdir(pdf_dir):
+    print(f"The specified directory '{pdf_dir}' does not exist. Please try again.")
+    exit(1)
+
+# Find PDFs ending with *master.pdf
+pdf_files = [os.path.join(pdf_dir, f) for f in os.listdir(pdf_dir) if f.endswith("master.pdf")]
+if not pdf_files:
+    print("No PDFs ending with 'master.pdf' found in the specified directory.")
+    exit(1)
+
+# Compile PDFs into a single file
+merger = PdfMerger()
+for pdf in sorted(pdf_files):
+    merger.append(pdf)
+
+# Save merged PDF with a filename including yyyy-mm-dd-time
+output_filename = f"{datetime.now():%Y-%m-%d-%H%M}-compiled.pdf"
+output_path = os.path.join(pdf_dir, output_filename)
+merger.write(output_path)
+merger.close()
+
+print(f"Compiled PDF saved as '{output_path}'.")
+
+'''This asks for a directory containing PDFs, finds PDFs ending with *master.pdf, and compiles them into a single PDF file.'''

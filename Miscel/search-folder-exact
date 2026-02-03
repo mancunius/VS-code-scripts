@@ -1,0 +1,53 @@
+import os
+
+def find_files_with_exact_text(directory, search_text, output_file):
+    # List to store file paths containing the exact search text
+    matching_files = []
+
+    # Text-based file extensions to include
+    valid_extensions = {'.tex', '.txt', '.html', '.csv', '.xml', '.md', '.gabc'}
+
+    # Iterate through all files in the directory
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+
+            # Skip files without valid extensions
+            if not any(file.endswith(ext) for ext in valid_extensions):
+                continue
+
+            try:
+                # Open the file and search for the exact text
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if search_text in content:
+                        matching_files.append(file_path)
+            except Exception as e:
+                print(f"Error reading file {file_path}: {e}")
+
+    # Write the matching files to the output file
+    if matching_files:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            for file in matching_files:
+                f.write(file + '\n')
+        print(f"Matching files saved to {output_file}")
+    else:
+        print("No files found containing the exact text.")
+
+    return matching_files
+
+
+# Specify the directory, search text, and output file path
+directory = '/Users/martinbaker/Dropbox/03_Professional/34_LaTeX/LaTeX_gregorio/ICEL-gregorio-2024'
+search_text = '<i>E. T.</i>'
+output_file = '/Users/martinbaker/Desktop/matching_files.txt'
+
+# Find and export matching files
+matching_files = find_files_with_exact_text(directory, search_text, output_file)
+
+if matching_files:
+    print("Files containing the exact text '<i>E.T.</i>':")
+    for file in matching_files:
+        print(file)
+else:
+    print("No files found containing the exact text '<i>E.T.</i>'.")

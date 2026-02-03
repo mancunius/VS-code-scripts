@@ -1,0 +1,44 @@
+import csv
+import re
+
+def process_csv(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        
+        # Add the new 'Waste' column to the fieldnames
+        fieldnames = reader.fieldnames + ['Waste']
+        
+        rows = []
+        for row in reader:
+            content = row['Content']
+            
+            # Use regex with re.S to find and remove text up to and including %%
+            match = re.search(r'^(.*?%%)', content, re.S)
+            if match:
+                waste = match.group(1).strip()  # Capture the removed portion
+                content = content[len(waste):].strip()  # Update the content
+            else:
+                waste = ""  # If no match, waste is empty
+            
+            # Update the row with new content and Waste column
+            row['Content'] = content
+            row['Waste'] = waste
+            rows.append(row)
+    
+    # Write the updated rows to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Processed {len(rows)} rows. Output saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_with_clefs.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed_with_waste.csv'
+
+# Run the function
+process_csv(input_csv, output_csv)
+
+'''The purpose of this script is to process a CSV file containing chant data. The script reads the input CSV file, extracts the 'Content' column, and uses regular expressions to find and remove text up to and including the '%%' delimiter. The removed text is stored in a new 'Waste' column, and the updated rows are written to a new CSV file. The script outputs the number of processed rows and the path to the output file.'''

@@ -1,0 +1,49 @@
+import csv
+import re
+
+def process_csv(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        
+        # Add the new 'Music' column to the fieldnames
+        fieldnames = reader.fieldnames + ['Music']
+        
+        rows = []
+        for row in reader:
+            content = row['Content']
+            
+            # Use regex to find everything in parentheses followed by optional whitespace
+            music = re.findall(r'\([^)]*\)\s?', content)
+            
+            # Join the found music parts into a single string
+            music_text = "".join(music)
+
+            music_text = re.sub(r'\)\(','-',music_text)
+            
+            music_text = re.sub(r'(\))*(\()*\!*v*\/*~*\'*w*(\[.+?\])*','',music_text)
+
+            music_text = re.sub(r'(?<=(\.|\_))(0|1)','',music_text)
+
+            music_text = music_text.lower()
+
+            # Add the captured music text to the new 'Music' column
+            row['Music'] = music_text.strip()
+            
+            # Append the row to the rows list
+            rows.append(row)
+    
+    # Write the updated rows to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Processed {len(rows)} rows. Output saved to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_modified_with_space.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed_with_music.csv'
+
+# Run the function
+process_csv(input_csv, output_csv)

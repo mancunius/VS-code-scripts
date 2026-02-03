@@ -1,0 +1,10 @@
+import random
+
+# Define the 12-note scale
+scale = ["c", "d flat", "d", "e flat", "e", "f", "f sharp", "g sharp", "a", "b flat", "b", "c"]
+
+# Randomly select 6 notes (with repeats)
+random_notes = [random.choice(scale) for _ in range(6)]
+
+# Output the selected notes
+print("Randomly selected notes:", random_notes)

@@ -1,0 +1,157 @@
+import os
+from pathlib import Path
+import shutil
+
+# --- CONFIG ---
+github_root = Path("/Users/martinbaker/Documents/GitHub")
+dropbox_root = Path("/Users/martinbaker/Dropbox/10_GitHub-PDFs")
+extensions_to_copy = [".pdf"]
+
+# --- FUNCTIONS ---
+def gather_pdfs(src_root: Path, dest_root: Path):
+    """Return a list of (source, destination) paths for PDFs that are new or updated."""
+    files_to_copy = []
+
+    if src_root.name == "ICEL-Graduale-Romanum":
+        # Only consider PDFs in the root of this repo folder
+        for file_path in src_root.iterdir():
+            if (
+                file_path.is_file()
+                and file_path.suffix.lower() in extensions_to_copy
+                and "blurb" not in file_path.name.lower()
+            ):
+                dest_path = dest_root / file_path.name
+
+                if not dest_path.exists() or file_path.stat().st_mtime > dest_path.stat().st_mtime:
+                    files_to_copy.append((file_path, dest_path))
+    else:
+        for file_path in src_root.rglob("*"):
+            if (
+                file_path.is_file()
+                and file_path.suffix.lower() in extensions_to_copy
+                and "blurb" not in file_path.name.lower()
+            ):
+                rel_path = file_path.relative_to(src_root)
+                dest_path = dest_root / rel_path
+
+                if not dest_path.exists() or file_path.stat().st_mtime > dest_path.stat().st_mtime:
+                    files_to_copy.append((file_path, dest_path))
+
+    return files_to_copy
+
+
+def gather_expected_dest_pdfs(src_root: Path, dest_root: Path):
+    """Return a set of destination PDF paths that *should* exist."""
+    expected = set()
+
+    if src_root.name == "ICEL-Graduale-Romanum":
+        for file_path in src_root.iterdir():
+            if (
+                file_path.is_file()
+                and file_path.suffix.lower() in extensions_to_copy
+                and "blurb" not in file_path.name.lower()
+            ):
+                expected.add(dest_root / file_path.name)
+    else:
+        for file_path in src_root.rglob("*"):
+            if (
+                file_path.is_file()
+                and file_path.suffix.lower() in extensions_to_copy
+                and "blurb" not in file_path.name.lower()
+            ):
+                rel_path = file_path.relative_to(src_root)
+                expected.add(dest_root / rel_path)
+
+    return expected
+
+
+def human_readable_size(size_bytes):
+    """Convert size in bytes to human-readable string."""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if size_bytes < 1024:
+            return f"{size_bytes:.2f} {unit}"
+        size_bytes /= 1024
+    return f"{size_bytes:.2f} PB"
+
+
+# --- MAIN WORKFLOW ---
+all_files_to_copy = []
+expected_dest_files = set()
+actual_dest_files = set()
+
+for repo_folder in github_root.iterdir():
+    if repo_folder.is_dir():
+        dest_repo_root = dropbox_root / repo_folder.name
+
+        # Files to copy
+        all_files_to_copy.extend(
+            gather_pdfs(repo_folder, dest_repo_root)
+        )
+
+        # Files that *should* exist
+        expected_dest_files |= gather_expected_dest_pdfs(
+            repo_folder, dest_repo_root
+        )
+
+        # Files that *do* exist
+        if dest_repo_root.exists():
+            actual_dest_files |= {
+                p for p in dest_repo_root.rglob("*.pdf")
+                if "blurb" not in p.name.lower()
+            }
+
+# Files to delete
+files_to_delete = sorted(actual_dest_files - expected_dest_files)
+
+# --- No-op check ---
+if not all_files_to_copy and not files_to_delete:
+    print("✨ Everything is up-to-date. No PDFs to copy or delete.")
+    exit(0)
+
+# --- List copy actions ---
+if all_files_to_copy:
+    print("Files to be copied:\n")
+    for src, dst in all_files_to_copy:
+        print(f"{src} → {dst}")
+
+    total_size = sum(src.stat().st_size for src, _ in all_files_to_copy)
+    readable_size = human_readable_size(total_size)
+
+    print(f"\nTotal files to copy: {len(all_files_to_copy)}")
+    print(f"Total size: {readable_size}")
+else:
+    readable_size = "0 B"
+
+# --- List delete actions ---
+if files_to_delete:
+    print("\nFiles to be deleted:\n")
+    for f in files_to_delete:
+        print(f"🗑️  {f}")
+
+# --- Ask for confirmation ---
+answer = input("\n❓ Apply these changes? (copy + delete) (y/N): ").strip().lower()
+if answer != "y":
+    print("🚫 Operation cancelled. No changes made.")
+    exit(0)
+
+# --- Perform copies ---
+copied_count = 0
+for src, dst in all_files_to_copy:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+    copied_count += 1
+    print(f"Copied: {src} → {dst}")
+
+# --- Perform deletions ---
+deleted_count = 0
+for f in files_to_delete:
+    f.unlink()
+    deleted_count += 1
+    print(f"Deleted: {f}")
+
+print(
+    f"\n✅ Done. "
+    f"{copied_count} PDFs copied, "
+    f"{deleted_count} PDFs deleted."
+)
+'''This script synchronizes PDF files from GitHub repositories to a Dropbox folder, copying new or updated files and deleting obsolete ones.'''

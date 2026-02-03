@@ -1,0 +1,27 @@
+import csv
+
+def extract_removed_column(input_file, output_file):
+    # Open the input CSV file
+    with open(input_file, mode='r', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        
+        # Define fieldnames for the new CSV file
+        fieldnames = ['Removed']
+        
+        # Collect rows for the new file
+        rows = [{'Removed': row['Removed']} for row in reader if 'Removed' in row]
+    
+    # Write the extracted data to the output CSV file
+    with open(output_file, mode='w', encoding='utf-8', newline='') as outfile:
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    
+    print(f"Extracted {len(rows)} rows to {output_file}.")
+
+# File paths
+input_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/chant_processed.csv'
+output_csv = '/Users/martinbaker/Dropbox/04_Music/453_chant-data/csv-files/removed_contents.csv'
+
+# Run the function
+extract_removed_column(input_csv, output_csv)

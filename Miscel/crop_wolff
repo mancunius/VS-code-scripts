@@ -1,0 +1,32 @@
+import os
+import subprocess
+
+def main():
+    directory = "/Users/martinbaker/Dropbox/04_Music/480_Lilypond-scores"
+
+    # Step 1: Delete files ending in "source_crop.pdf"
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith("source_crop.pdf"):
+                file_path = os.path.join(root, file)
+                try:
+                    os.remove(file_path)
+                    print(f"Deleted: {file_path}")
+                except Exception as e:
+                    print(f"Error deleting {file_path}: {e}")
+
+    # Step 2: Find and crop files ending in "source.pdf"
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith("source.pdf"):
+                source_file_path = os.path.join(root, file)
+                output_file_path = os.path.join(root, file.replace("source.pdf", "source_crop.pdf"))
+                try:
+                    # Crop the file using pdfcrop
+                    subprocess.run(["pdfcrop", source_file_path, output_file_path], check=True)
+                    print(f"Cropped: {source_file_path} -> {output_file_path}")
+                except Exception as e:
+                    print(f"Error cropping {source_file_path}: {e}")
+
+if __name__ == "__main__":
+    main()
