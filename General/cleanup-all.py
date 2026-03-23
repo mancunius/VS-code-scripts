@@ -1,12 +1,16 @@
 import os
 from pathlib import Path
 
+# Toggle this:
+DRY_RUN = True  # True = preview only, False = actually delete
+
 # Define all folders to process
 folders_to_process = [
     Path("/Users/martinbaker/Documents/GitHub/AdFontes/"),
     Path("/Users/martinbaker/Dropbox/03_Professional/34_LaTeX/LaTeX_invoices"),
     Path("/Users/martinbaker/Documents/GitHub/ICEL-Graduale-Romanum"),
-    Path("/Users/martinbaker/Documents/GitHub/2025-Abbots-Abbesses-Virgins")
+    Path("/Users/martinbaker/Documents/GitHub/2025-Abbots-Abbesses-Virgins"),
+    Path("/Users/martinbaker/Documents/GitHub/2026-Virgins")
 ]
 
 # Define file extensions to delete
@@ -47,11 +51,8 @@ for f in all_files:
 
 print(f"\nTotal: {len(all_files)} files\n")
 
-# Ask for confirmation
-answer = input("❓ Delete all listed files? (y/N): ").strip().lower()
-
-if answer != "y":
-    print("🚫 Deletion cancelled. No files were removed.")
+if DRY_RUN:
+    print("🧪 DRY RUN enabled — no files were deleted.")
     exit(0)
 
 # Proceed with deletion
@@ -68,4 +69,4 @@ for file_path in all_files:
 
 print(f"\n✅ Done. {deleted} files deleted.")
 
-'''This script cleans up auxiliary files (like .log, .aux, etc.) from specified LaTeX project directories. It scans the directories, lists the files to be deleted, asks for user confirmation, and then deletes the files if confirmed.'''
+'''This script will scan the specified folders and their subfolders for files with the defined extensions and delete them. Toggle the DRY_RUN variable to preview the files that would be deleted without actually deleting them. Make sure to review the list of files before running with DRY_RUN set to False.'''
