@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 # Toggle this:
-DRY_RUN = True  # True = preview only, False = actually delete
+DRY_RUN = False  # True = preview only, False = actually delete
 
 # Define all folders to process
 folders_to_process = [
