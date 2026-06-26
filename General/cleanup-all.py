@@ -10,7 +10,8 @@ folders_to_process = [
     Path("/Users/martinbaker/Dropbox/03_Professional/34_LaTeX/LaTeX_invoices"),
     Path("/Users/martinbaker/Documents/GitHub/ICEL-Graduale-Romanum"),
     Path("/Users/martinbaker/Documents/GitHub/2025-Abbots-Abbesses-Virgins"),
-    Path("/Users/martinbaker/Documents/GitHub/2026-Virgins")
+    Path("/Users/martinbaker/Documents/GitHub/2026-Virgins"),
+    Path("/Users/martinbaker/Dropbox/04_Music/480_Lilypond-scores/01-LaTex_compiler")
 ]
 
 # Define file extensions to delete
