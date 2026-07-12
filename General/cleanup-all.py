@@ -11,7 +11,8 @@ folders_to_process = [
     Path("/Users/martinbaker/Documents/GitHub/ICEL-Graduale-Romanum"),
     Path("/Users/martinbaker/Documents/GitHub/2025-Abbots-Abbesses-Virgins"),
     Path("/Users/martinbaker/Documents/GitHub/2026-Virgins"),
-    Path("/Users/martinbaker/Dropbox/04_Music/480_Lilypond-scores/01-LaTex_compiler")
+    Path("/Users/martinbaker/Dropbox/04_Music/480_Lilypond-scores/01-LaTex_compiler"),
+    Path("/Users/martinbaker/Documents/GitHub/2026-LoH-card-inserts")
 ]
 
 # Define file extensions to delete
